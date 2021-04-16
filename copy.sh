@@ -20,6 +20,17 @@ function assert_is_installed {
 		exit 1
 }
 
+function log_error { 
+	local readonly message "$1"
+	log "ERROR" "$message"
+}
+
+function log {
+	local readonly level="$1"
+	local readonly message="$2"
+	local readonly timestamp=$(date + "%Y-%m-%d %H:%M:%S") >&2 echo -e "${timestamp} [{$level}] [$SCRIPT_NAME] ${message}"
+}
+
 
 function run { 
 	assert_is_installed"mysql"
