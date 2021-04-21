@@ -18,6 +18,9 @@ function assert_is_installed {
 	if [[ ! $(command -v ${name}) ]]; then
 		log_error "The binario '$name' se requiere pero no esta en nuestro sistema"
 		exit 1
+
+	fi
+
 }
 
 function log_error { 
@@ -37,3 +40,31 @@ function run {
 	assert_is_installed"mysqldump"
 	assert_is_installed"gzip"
 }
+
+function make_backup {
+        local BAK="$(echo $HOME/mysql)"
+        local MYSQL="$(which mysql)"
+        local MYSQLDUMP="$(which mysqldump)"
+        local GZIP="$(which gzip)"
+        local NOW="$(date +"+%d-%m-%Y")"
+
+        USER="nagios"
+        PASSWORD="nagiosplatziS14*"
+        HOST="localhost"
+        DATABASE="pruebas"
+
+        [ ! -d "$BAK" ] && mkdir -p "$BAK"
+
+        FILE=$BAK/$DATABASE.$NOW-$(date +"%T").gz
+        local SECONDS=0
+
+        $MYSQLDUMP --single-transaction --set-gtid-purged=OFF -u $USER -h $HOST -p$PASSWORD $DATABASE | $GZIP -9 > $FILE
+
+        duration=$SECONDS
+
+        echo "$(($duration / 60 )) minutes"
+}
+
+run 
+make_backup
+
